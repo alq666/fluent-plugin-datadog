@@ -15,14 +15,23 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
-class Fluent::DatadogOutput < Fluent::Output
+class Fluent::DatadogOutput < Fluent::BufferedOutput
+  include Fluent::SetTimeKeyMixin
+  include Fluent::SetTagKeyMixin
+
   Fluent::Plugin.register_output('datadog', self)
 
+  config_set_default :include_time_key, true
+  config_set_default :include_tag_key, true
+
   config_param :dd_api_key, :string
+  config_param :dd_app_key, :string, :default => nil
+  config_param :host, :string, :default => nil
 
   def initialize
     super
     require 'dogapi'
+    require 'time'
   end
 
   def start
@@ -32,7 +41,7 @@ class Fluent::DatadogOutput < Fluent::Output
   def shutdown
     super
   end
-  
+
   def configure(conf)
     super
 
@@ -40,31 +49,36 @@ class Fluent::DatadogOutput < Fluent::Output
       raise Fluent::ConfigError, "missing Datadog API key"
     end
 
-    @dog = Dogapi::Client.new(@dd_api_key)
+    client_args = [@dd_api_key]
+    client_args << @dd_app_key if @dd_app_key
+    @dog = Dogapi::Client.new(*client_args)
   end
 
-  def emit(tag, es, chain)
-    begin
-      $log.trace "Send metrics to Datadog"
-      es.each do |tstamp, record|
-        record.each do |key, value|
-          $log.trace "Sending #{key}: #{value}@#{tstamp}"
-          #@dog.emit_points(key, [tstamp, value])
-        end
+  def format(time, tag, record)
+    record.to_msgpack
+  end
+
+  def write(chunk)
+    enum = chunk.to_enum(:msgpack_each)
+
+    enum.chunk {|record|
+      record.values_at('metric', 'tag', 'host', 'type')
+    }.each {|i, records|
+      metric, tag, host, type = i
+      host = @host unless host
+
+      points = records.map do |record|
+        time = Time.parse(record['time'])
+        value = record['value']
+        [time, value]
       end
-    rescue
-      $log.warn "Cannot send metrics to Datadog. Skipping..."
-    end
-    
-    # Done reporting metrics
-    chain.next
-  end
 
-  def map_key(key, pattern, replace)
-    unless pattern =~ key
-      nil
-    else
-      key.sub(pattern, replace)
-    end
+      options = {}
+      options['tags'] = [tag] if tag
+      options['host'] = host if host
+      options['type'] = type if type
+
+      @dog.emit_points(metric, points, options)
+    }
   end
 end
