@@ -119,7 +119,6 @@ describe Fluent::DatadogOutput do
     end
   end
 
-
   it 'should be called emit_points with host' do
     run_driver(:host => 'www.example.com') do |d, dog|
       dog.should_receive(:emit_points).with(
