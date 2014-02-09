@@ -18,6 +18,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "fluentd"
   gem.add_development_dependency "dogapi"
   gem.add_development_dependency "flexmock"
+  gem.add_development_dependency "rspec", ">= 2.11.0"
   gem.add_runtime_dependency "fluentd"
   gem.add_runtime_dependency "dogapi"
 end
