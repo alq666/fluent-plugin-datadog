@@ -19,5 +19,5 @@ Usage
 =====
 
 ```sh
-echo '{"metric":"some.metric.nam", "value":50.0}' | fluent-cat datadog.metric
+echo '{"metric":"some.metric.name", "value":50.0}' | fluent-cat datadog.metric
 ```
