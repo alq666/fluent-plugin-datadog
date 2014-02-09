@@ -61,7 +61,9 @@ class Fluent::DatadogOutput < Fluent::BufferedOutput
   def write(chunk)
     enum = chunk.to_enum(:msgpack_each)
 
-    enum.chunk {|record|
+    enum.select {|record|
+      record['metric']
+    }.chunk {|record|
       record.values_at('metric', 'tag', 'host', 'type')
     }.each {|i, records|
       metric, tag, host, type = i
