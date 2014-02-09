@@ -13,7 +13,7 @@ describe Fluent::DatadogOutput do
     run_driver(:dd_app_key => "test_dd_api_key") {|d, dog| }
   end
 
-  it 'should receive an API key' do
+  it 'should be called emit_points' do
     run_driver do |d, dog|
 
       dog.should_receive(:emit_points).with(
