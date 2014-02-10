@@ -142,6 +142,12 @@ describe Fluent::DatadogOutput do
         {"tags"=>["test.default"]}
       )
 
+      log = d.instance.log
+      log.should_receive(:warn)
+         .with('`metric` key does not exist: {"no metric"=>"some.metric.name", "value"=>51.0, "time"=>"2014-02-08T04:14:15Z", "tag"=>"test.default"}')
+      log.should_receive(:warn)
+         .with('`metric` key does not exist: {"no metric"=>"some.metric.name", "value"=>101.0, "time"=>"2014-02-08T04:14:15Z", "tag"=>"test.default"}')
+
       d.emit({"no metric" => "some.metric.name", "value" => 51.0}, time)
       d.emit({"no metric" => "some.metric.name", "value" => 101.0}, time)
       d.emit({"metric" => "some.metric.name", "value" => 50.0}, time)

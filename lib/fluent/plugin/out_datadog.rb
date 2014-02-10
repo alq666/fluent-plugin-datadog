@@ -21,6 +21,10 @@ class Fluent::DatadogOutput < Fluent::BufferedOutput
 
   Fluent::Plugin.register_output('datadog', self)
 
+  unless method_defined?(:log)
+    define_method('log') { $log }
+  end
+
   config_set_default :include_time_key, true
   config_set_default :include_tag_key, true
 
@@ -62,6 +66,10 @@ class Fluent::DatadogOutput < Fluent::BufferedOutput
     enum = chunk.to_enum(:msgpack_each)
 
     enum.select {|record|
+      unless record['metric']
+        log.warn("`metric` key does not exist: #{record.inspect}")
+      end
+
       record['metric']
     }.chunk {|record|
       record.values_at('metric', 'tag', 'host', 'type')
