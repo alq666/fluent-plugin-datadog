@@ -28,8 +28,6 @@ def run_driver(options = {})
     end
   }.join("\n")
 
-  tag = options[:tag] || 'test.default'
-
   fluentd_conf = <<-EOS
 type datadog
 dd_api_key #{dd_api_key}
