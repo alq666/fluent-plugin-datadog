@@ -58,7 +58,7 @@ class Fluent::DatadogOutput < Fluent::BufferedOutput
     @dog = Dogapi::Client.new(*client_args)
   end
 
-  def format(time, tag, record)
+  def format(tag, time, record)
     record.to_msgpack
   end
 
