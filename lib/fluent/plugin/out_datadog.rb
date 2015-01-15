@@ -88,7 +88,10 @@ class Fluent::DatadogOutput < Fluent::BufferedOutput
       options['host'] = host if host
       options['type'] = type if type
 
-      @dog.emit_points(metric, points, options)
+      code, response = @dog.emit_points(metric, points, options)
+      if code.to_i / 100 != 2
+        raise("Datadog API returns error on emit_points: #{code}: #{response.inspect}")
+      end
     }
   end
 end
