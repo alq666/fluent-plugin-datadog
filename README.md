@@ -1,3 +1,5 @@
+[Screenshot](http://i.imgur.com/EjAaNl4.png)
+
 fluent-plugin-datadog
 =====================
 
