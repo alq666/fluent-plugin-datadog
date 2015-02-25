@@ -84,9 +84,9 @@ class Fluent::DatadogOutput < Fluent::BufferedOutput
       end
 
       options = {}
-      options['tags'] = [tag] if tag
-      options['host'] = host if host
-      options['type'] = type if type
+      options[:tags] = [tag] if tag
+      options[:host] = host if host
+      options[:type] = type if type
 
       @dog.emit_points(metric, points, options)
     }
